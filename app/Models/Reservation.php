@@ -9,25 +9,34 @@ class Reservation extends Model
     protected $fillable = [
         'user_id',
         'salle_id',
+        'matiere_id',
+        'classe_id',
         'date_debut',
         'heure_fin',
         'motif',
         'statut',
     ];
 
-    // Une réservation appartient à un professeur
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Une réservation appartient à une salle
     public function salle()
     {
         return $this->belongsTo(Salle::class);
     }
 
-    // Méthodes utilitaires
+    public function matiere()
+    {
+        return $this->belongsTo(Matiere::class);
+    }
+
+    public function classe()
+    {
+        return $this->belongsTo(Classe::class);
+    }
+
     public function isEnAttente(): bool
     {
         return $this->statut === 'en_attente';
@@ -36,5 +45,9 @@ class Reservation extends Model
     public function isValidee(): bool
     {
         return $this->statut === 'validee';
+    }
+
+    public function cahierDeTexte(){
+        return $this->hasOne(CahierDeTexte::class);
     }
 }
