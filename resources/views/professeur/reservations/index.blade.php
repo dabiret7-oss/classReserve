@@ -30,6 +30,7 @@
             <div style="border:1px solid #f0f0f0; border-radius:8px;
                         padding:16px; margin-bottom:12px">
                 <div style="display:flex; justify-content:space-between; align-items:start">
+
                     <div>
                         <p style="font-weight:700; color:#1a2b4a; margin:0 0 6px 0; font-size:16px">
                             {{ $reservation->motif }}
@@ -47,13 +48,14 @@
                             → {{ \Carbon\Carbon::parse($reservation->heure_fin)->format('H\hi') }}
                         </p>
                     </div>
+
                     <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px">
+
                         @if($reservation->statut === 'en_attente')
                             <span style="background:#fff3cd; color:#856404; padding:4px 12px;
                                          border-radius:12px; font-size:12px; font-weight:600">
                                 En attente
                             </span>
-                            {{-- Bouton annuler uniquement si en attente --}}
                             <form method="POST"
                                   action="{{ route('professeur.reservations.annuler', $reservation) }}">
                                 @csrf
@@ -66,30 +68,26 @@
                                     Annuler
                                 </button>
                             </form>
-                            @if($reservation->statut === 'validee')
-    <span style="background:#d4edda; color:#155724; padding:4px 12px;
-                 border-radius:12px; font-size:12px; font-weight:600">
-        Validée ✓
-    </span>
-    @if(!$reservation->cahierDeTexte)
-        <a href="{{ route('professeur.cahiers.create', $reservation) }}"
-           style="background:#1a3c6e; color:white; padding:4px 12px;
-                  border-radius:6px; font-size:12px; text-decoration:none;
-                  font-weight:600; display:block; text-align:center; margin-top:6px">
-            + Cahier de texte
-        </a>
-    @else
-        <span style="font-size:12px; color:#28a745; font-weight:600;
-                     display:block; margin-top:6px">
-            ✓ Cahier renseigné
-        </span>
-    @endif
+
+                        @elseif($reservation->statut === 'validee')
+                            <span style="background:#d4edda; color:#155724; padding:4px 12px;
+                                         border-radius:12px; font-size:12px; font-weight:600">
+                                Validée ✓
+                            </span>
+                            <a href="{{ route('professeur.cahiers.index') }}"
+                               style="background:#1a3c6e; color:white; padding:4px 12px;
+                                      border-radius:6px; font-size:12px; text-decoration:none;
+                                      font-weight:600; display:block; text-align:center">
+                                📖 Cahiers
+                            </a>
+
                         @else
                             <span style="background:#f8d7da; color:#721c24; padding:4px 12px;
                                          border-radius:12px; font-size:12px; font-weight:600">
                                 Rejetée
                             </span>
                         @endif
+
                     </div>
                 </div>
             </div>
