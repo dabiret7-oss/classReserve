@@ -102,4 +102,29 @@ class ReservationController extends Controller
 
         return back()->with('success', 'Réservation annulée.');
     }
+
+
+    public function calendrier()
+{
+    $reservations = Reservation::where('statut', 'validee')
+        ->with(['salle', 'matiere'])
+        ->get()
+        ->map(fn($r) => [
+            'id'    => $r->id,
+            'title' => $r->salle->nom . ' — ' . ($r->matiere?->nom ?? $r->motif),
+            'start' => $r->date_debut,
+            'end'   => date('Y-m-d', strtotime($r->date_debut)) . 'T' . $r->heure_fin,
+            // Réservations du prof connecté en bleu, les autres en gris
+            'color' => $r->user_id === Auth::id() ? '#1a3c6e' : '#adb5bd',
+            'extendedProps' => [
+                'salle'   => $r->salle->nom . ' — ' . $r->salle->niveau,
+                'matiere' => $r->matiere?->nom ?? '—',
+                'moi'     => $r->user_id === Auth::id(),
+            ],
+        ]);
+
+    $salles = \App\Models\Salle::where('statut', 'active')->get();
+
+    return view('professeur.calendrier', compact('reservations', 'salles'));
+}
 }

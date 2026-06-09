@@ -39,7 +39,15 @@ class LoginController extends Controller
             return back()->withErrors(['email'=>'votre demande d\'inscription à été rejeté ']);
         }
 
+        if ($user->role === 'professeur' && $user->statut === 'desactive') {
+            Auth::logout();
+            return back()->withErrors([
+                'email' => 'Votre compte a été désactivé. Contactez l\'administrateur.'
+            ]);
+        }
+
         $request->session()->regenerate();
         return redirect()->intended($user->isAdmin()? route('admin.dashboard'):route('professeur.dashboard'));
     }
+    
 }

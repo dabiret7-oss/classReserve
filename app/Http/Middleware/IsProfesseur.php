@@ -14,11 +14,11 @@ class IsProfesseur
      * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
-    {
-        $user= auth()->user(); 
-        if(!$user || $user->role !=='professeur' || !$user->isValidated()){
-            abort(403, 'Compte non valdé ou acces interdit');
-        }
-        return $next($request);
+{
+    $user = auth()->user();
+    if (!$user || $user->role !== 'professeur' || !$user->isValidated()) {
+        abort(403, 'Compte non validé ou accès interdit');
     }
+    return $next($request);
+}
 }

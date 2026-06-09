@@ -112,4 +112,30 @@ class ReservationController extends Controller
             ->with('success',
                 "Salle {$reservation->salle->nom} attribuée à {$reservation->user->nom} pour {$reservation->motif}.");
     }
+
+
+    // Calendrier
+public function calendrier()
+{
+    $reservations = Reservation::where('statut', 'validee')
+        ->with(['salle', 'user', 'matiere', 'classe'])
+        ->get()
+        ->map(fn($r) => [
+            'id'    => $r->id,
+            'title' => $r->salle->nom . ' — ' . ($r->matiere?->nom ?? $r->motif),
+            'start' => $r->date_debut,
+            'end'   => date('Y-m-d', strtotime($r->date_debut)) . 'T' . $r->heure_fin,
+            'color' => $r->salle->statut === 'active' ? '#1a3c6e' : '#6c757d',
+            'extendedProps' => [
+                'professeur' => $r->user->nom . ' ' . $r->user->prenoms,
+                'salle'      => $r->salle->nom . ' — ' . $r->salle->niveau,
+                'classe'     => $r->classe?->nom ?? '—',
+                'matiere'    => $r->matiere?->nom ?? '—',
+            ],
+        ]);
+
+    $salles = \App\Models\Salle::where('statut', 'active')->get();
+
+    return view('admin.calendrier', compact('reservations', 'salles'));
+}
 }

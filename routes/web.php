@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Professeur\ReservationController;
 use App\Http\Controllers\Professeur\CahierController as ProfCahierController;
+use App\Http\Controllers\ProfilController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => redirect()->route('login'));
@@ -24,14 +25,25 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [LogoutController::class, 'logout'])->name('logout')->middleware('auth');
 
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
+    Route::patch('/profil/infos', [ProfilController::class, 'updateInfos'])->name('profil.infos');
+    Route::patch('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.password');
+});
+
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/dashboard', fn() => view('admin.dashboard'))->name('dashboard');
+    Route::get('/calendrier', [AdminReservationController::class, 'calendrier'])->name('calendrier');
 
     // Utilisateurs
     Route::get('/users', [UserValidationController::class, 'index'])->name('users.index');
     Route::patch('/users/{user}/validate', [UserValidationController::class, 'validateUser'])->name('users.validate');
     Route::patch('/users/{user}/reject', [UserValidationController::class, 'rejectUser'])->name('users.reject');
-
+    Route::patch('/users/{user}/toggle-desactive', [UserValidationController::class, 'toggleDesactive'])->name('users.toggle-desactive');
+    Route::delete('/users/{user}', [UserValidationController::class, 'destroy'])->name('users.destroy');
+    Route::patch('/users/{id}/restore', [UserValidationController::class, 'restore'])->name('users.restore');
+    
     // Salles
     Route::get('/salles', [SalleController::class, 'index'])->name('salles.index');
     Route::get('/salles/create', [SalleController::class, 'create'])->name('salles.create');
@@ -67,6 +79,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
 Route::prefix('professeur')->name('professeur.')->middleware(['auth', 'professeur'])->group(function () {
     Route::get('/dashboard', fn() => view('professeur.dashboard'))->name('dashboard');
+    Route::get('/calendrier', [ReservationController::class, 'calendrier'])->name('calendrier');
 
     // Réservations
     Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');

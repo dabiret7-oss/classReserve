@@ -9,11 +9,11 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class User extends Authenticatable
-{
+class User extends Authenticatable{
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
     protected $fillable = [
         'nom',
         'prenoms',
@@ -50,8 +50,14 @@ class User extends Authenticatable
     }
 
     // Un professeur peut avoir plusieurs réservations
-public function reservations()
-{
+    public function reservations(){
     return $this->hasMany(Reservation::class);
+    }
+
+
+    public function isDesactive(): bool
+{
+    return $this->statut === 'desactive';
 }
+
 }

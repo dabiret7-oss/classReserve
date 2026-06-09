@@ -317,7 +317,13 @@
 
     @auth
     <div class="nav-links">
-        <span class="nav-user">{{ auth()->user()->nom }}</span>
+        <a href="{{ route('profil.index') }}"
+    style="color:rgba(255,255,255,0.85); text-decoration:none; font-size:13px;
+            padding:8px 14px; border-radius:6px; transition:background 0.2s;"
+    onmouseover="this.style.background='rgba(255,255,255,0.12)'"
+    onmouseout="this.style.background='none'">
+        👤 {{ auth()->user()->nom }}
+    </a>
         <div class="nav-divider"></div>
 
         @if(auth()->user()->isAdmin())
@@ -328,10 +334,12 @@
             <a href="{{ route('admin.classes.index') }}">Classes</a>
             <a href="{{ route('admin.reservations.index') }}">Réservations</a>
             <a href="{{ route('admin.cahiers.index') }}">Cahiers</a>
+            <a href="{{ route('admin.calendrier') }}">Calendrier</a>
         @else
             <a href="{{ route('professeur.dashboard') }}">Tableau de bord</a>
             <a href="{{ route('professeur.reservations.index') }}">Réservations</a>
             <a href="{{ route('professeur.cahiers.index') }}">Cahiers de texte</a>
+            <a href="{{ route('professeur.calendrier') }}">Calendrier</a>
 
             {{-- Cloche notifications --}}
             @php
