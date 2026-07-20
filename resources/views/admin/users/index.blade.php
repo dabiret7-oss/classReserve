@@ -1,76 +1,60 @@
 @extends('layouts.app')
 @section('title', 'Gestion des professeurs')
+@section('page-title', 'Gestion des professeurs')
+
 @section('content')
-<div style="max-width:960px; margin:40px auto; padding:0 24px">
 
-    <h1 style="font-size:28px; font-weight:700; color:#1a2b4a; margin-bottom:24px">
-        Gestion des professeurs
-    </h1>
+{{-- Demandes en attente --}}
+<div class="bg-white rounded-xl border border-gray-200 p-5 mb-5">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-base font-semibold text-[#1a2b4a]">Demandes en attente</h2>
+        <span class="bg-orange-100 text-orange-700 text-xs font-bold px-2.5 py-1 rounded-full">
+            {{ $pendingUsers->count() }}
+        </span>
+    </div>
 
-    @if(session('success'))
-        <div style="background:#d4edda; color:#155724; padding:12px 16px;
-                    border-radius:6px; margin-bottom:20px; font-size:14px">
-            {{ session('success') }}
+    @if($pendingUsers->isEmpty())
+        <div class="text-center py-8 text-gray-400">
+            <i class="ti ti-users text-3xl block mb-2 text-gray-200"></i>
+            <p class="text-sm">Aucune demande en attente.</p>
         </div>
-    @endif
-
-    {{-- Demandes en attente --}}
-    <div style="background:white; border-radius:10px;
-                box-shadow:0 1px 4px rgba(0,0,0,0.08); padding:24px; margin-bottom:32px">
-
-        <h2 style="font-size:18px; color:#1a3c6e; margin:0 0 16px 0">
-            Demandes en attente
-            <span style="background:#fd7e14; color:white; font-size:12px;
-                         padding:2px 10px; border-radius:12px; margin-left:8px">
-                {{ $pendingUsers->count() }}
-            </span>
-        </h2>
-
-        @if($pendingUsers->isEmpty())
-            <p style="color:#666; font-size:14px">Aucune demande en attente.</p>
-        @else
-            <table style="width:100%; border-collapse:collapse; font-size:14px">
+    @else
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
                 <thead>
-                    <tr style="background:#f5f7fa">
-                        <th style="text-align:left; padding:12px 16px; color:#444;
-                                   font-weight:600; border-bottom:2px solid #e9ecef">Nom</th>
-                        <th style="text-align:left; padding:12px 16px; color:#444;
-                                   font-weight:600; border-bottom:2px solid #e9ecef">E-mail</th>
-                        <th style="text-align:left; padding:12px 16px; color:#444;
-                                   font-weight:600; border-bottom:2px solid #e9ecef">Date d'inscription</th>
-                        <th style="text-align:left; padding:12px 16px; color:#444;
-                                   font-weight:600; border-bottom:2px solid #e9ecef">Actions</th>
+                    <tr class="bg-gray-50">
+                        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 border-b border-gray-200">Nom</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 border-b border-gray-200">E-mail</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 border-b border-gray-200">Date d'inscription</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 border-b border-gray-200">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($pendingUsers as $user)
-                    <tr style="border-bottom:1px solid #f0f0f0">
-                        <td style="padding:14px 16px; font-weight:600; color:#1a2b4a">
-                            {{ $user->nom }} {{ $user->prenoms }}
-                        </td>
-                        <td style="padding:14px 16px; color:#555">{{ $user->email }}</td>
-                        <td style="padding:14px 16px; color:#555">
-                            {{ $user->created_at->format('d/m/Y H:i') }}
-                        </td>
-                        <td style="padding:14px 16px">
-                            <div style="display:flex; gap:8px">
-                                <form method="POST"
-                                      action="{{ route('admin.users.validate', $user) }}">
+                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                        <td class="px-4 py-3 font-semibold text-[#1a2b4a]">{{ $user->nom }} {{ $user->prenoms }}</td>
+                        <td class="px-4 py-3 text-gray-500">{{ $user->email }}</td>
+                        <td class="px-4 py-3 text-gray-500">{{ $user->created_at->format('d/m/Y H:i') }}</td>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-2">
+                                <button type="button"
+                                        onclick="ouvrirModalAction('valider', '{{ $user->id }}', '{{ $user->nom }} {{ $user->prenoms }}')"
+                                        title="Valider"
+                                        class="w-8 h-8 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 flex items-center justify-center transition-colors">
+                                    <i class="ti ti-check text-base"></i>
+                                </button>
+                                <form method="POST" action="{{ route('admin.users.validate', $user) }}" id="form-valider-{{ $user->id }}">
                                     @csrf @method('PATCH')
-                                    <button style="background:#28a745; color:white; padding:6px 14px;
-                                                   border:none; border-radius:6px; font-size:13px;
-                                                   font-weight:600; cursor:pointer">
-                                        Valider
-                                    </button>
                                 </form>
-                                <form method="POST"
-                                      action="{{ route('admin.users.reject', $user) }}">
+
+                                <button type="button"
+                                        onclick="ouvrirModalAction('rejeter', '{{ $user->id }}', '{{ $user->nom }} {{ $user->prenoms }}')"
+                                        title="Rejeter"
+                                        class="w-8 h-8 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 flex items-center justify-center transition-colors">
+                                    <i class="ti ti-x text-base"></i>
+                                </button>
+                                <form method="POST" action="{{ route('admin.users.reject', $user) }}" id="form-rejeter-{{ $user->id }}">
                                     @csrf @method('PATCH')
-                                    <button style="background:#cc0000; color:white; padding:6px 14px;
-                                                   border:none; border-radius:6px; font-size:13px;
-                                                   font-weight:600; cursor:pointer">
-                                        Refuser
-                                    </button>
                                 </form>
                             </div>
                         </td>
@@ -78,104 +62,85 @@
                     @endforeach
                 </tbody>
             </table>
-        @endif
-    </div>
+        </div>
+    @endif
+</div>
 
-    {{-- Professeurs traités --}}
-    <div style="background:white; border-radius:10px;
-                box-shadow:0 1px 4px rgba(0,0,0,0.08); padding:24px">
+{{-- Professeurs traités --}}
+<div class="bg-white rounded-xl border border-gray-200 p-5">
+    <h2 class="text-base font-semibold text-[#1a2b4a] mb-4">Professeurs traités</h2>
 
-        <h2 style="font-size:18px; color:#1a3c6e; margin:0 0 16px 0">
-            Professeurs traités
-        </h2>
-
-        <table style="width:100%; border-collapse:collapse; font-size:14px">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
             <thead>
-                <tr style="background:#f5f7fa">
-                    <th style="text-align:left; padding:12px 16px; color:#444;
-                               font-weight:600; border-bottom:2px solid #e9ecef">Nom</th>
-                    <th style="text-align:left; padding:12px 16px; color:#444;
-                               font-weight:600; border-bottom:2px solid #e9ecef">E-mail</th>
-                    <th style="text-align:left; padding:12px 16px; color:#444;
-                               font-weight:600; border-bottom:2px solid #e9ecef">Statut</th>
-                    <th style="text-align:left; padding:12px 16px; color:#444;
-                               font-weight:600; border-bottom:2px solid #e9ecef">Mis à jour le</th>
-                    <th style="text-align:left; padding:12px 16px; color:#444;
-                               font-weight:600; border-bottom:2px solid #e9ecef">Actions</th>
+                <tr class="bg-gray-50">
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 border-b border-gray-200">Nom</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 border-b border-gray-200">E-mail</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 border-b border-gray-200">Statut</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 border-b border-gray-200">Mis à jour le</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 border-b border-gray-200">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($toutProfesseur as $user)
-                <tr style="border-bottom:1px solid #f0f0f0;
-                           {{ $user->deleted_at ? 'opacity:0.5;' : '' }}">
-                    <td style="padding:14px 16px; font-weight:600; color:#1a2b4a">
+                <tr class="border-b border-gray-100 hover:bg-gray-50 {{ $user->deleted_at ? 'opacity-50' : '' }}">
+                    <td class="px-4 py-3 font-semibold text-[#1a2b4a]">
                         {{ $user->nom }} {{ $user->prenoms }}
                         @if($user->deleted_at)
-                            <span style="font-size:11px; color:#dc3545; font-weight:400">
-                                (supprimé)
-                            </span>
+                            <span class="text-xs text-red-500 font-normal ml-1">(supprimé)</span>
                         @endif
                     </td>
-                    <td style="padding:14px 16px; color:#555">{{ $user->email }}</td>
-                    <td style="padding:14px 16px">
+                    <td class="px-4 py-3 text-gray-500">{{ $user->email }}</td>
+                    <td class="px-4 py-3">
                         @if($user->statut === 'valide')
-                            <span style="background:#d4edda; color:#155724; padding:4px 12px;
-                                         border-radius:12px; font-size:12px; font-weight:600">
-                                Validé
-                            </span>
+                            <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-1 rounded-full">Validé</span>
                         @elseif($user->statut === 'desactive')
-                            <span style="background:#fff3cd; color:#856404; padding:4px 12px;
-                                         border-radius:12px; font-size:12px; font-weight:600">
-                                Désactivé
-                            </span>
+                            <span class="bg-amber-100 text-amber-800 text-xs font-semibold px-2.5 py-1 rounded-full">Désactivé</span>
                         @else
-                            <span style="background:#f8d7da; color:#721c24; padding:4px 12px;
-                                         border-radius:12px; font-size:12px; font-weight:600">
-                                Refusé
-                            </span>
+                            <span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-1 rounded-full">Refusé</span>
                         @endif
                     </td>
-                    <td style="padding:14px 16px; color:#555">
-                        {{ $user->updated_at->format('d/m/Y') }}
-                    </td>
-                    <td style="padding:14px 16px">
-                        <div style="display:flex; gap:6px; flex-wrap:wrap">
+                    <td class="px-4 py-3 text-gray-500">{{ $user->updated_at->format('d/m/Y') }}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-1.5">
                             @if(!$user->deleted_at)
                                 {{-- Désactiver / Réactiver --}}
-                                <form method="POST"
-                                      action="{{ route('admin.users.toggle-desactive', $user) }}">
+                                <button type="button"
+                                        onclick="ouvrirModalAction('{{ $user->statut === 'desactive' ? 'reactiver' : 'desactiver' }}', '{{ $user->id }}', '{{ $user->nom }} {{ $user->prenoms }}')"
+                                        title="{{ $user->statut === 'desactive' ? 'Réactiver' : 'Désactiver' }}"
+                                        class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors
+                                               {{ $user->statut === 'desactive'
+                                                   ? 'bg-green-50 text-green-700 hover:bg-green-100'
+                                                   : 'bg-amber-50 text-amber-700 hover:bg-amber-100' }}">
+                                    <i class="ti {{ $user->statut === 'desactive' ? 'ti-player-play' : 'ti-player-pause' }} text-base"></i>
+                                </button>
+                                <form method="POST" action="{{ route('admin.users.toggle-desactive', $user) }}"
+                                      id="form-toggle-{{ $user->id }}">
                                     @csrf @method('PATCH')
-                                    <button style="background:{{ $user->statut === 'desactive' ? '#28a745' : '#fd7e14' }};
-                                                   color:white; padding:5px 12px; border:none;
-                                                   border-radius:6px; font-size:12px;
-                                                   font-weight:600; cursor:pointer">
-                                        {{ $user->statut === 'desactive' ? 'Réactiver' : 'Désactiver' }}
-                                    </button>
                                 </form>
 
                                 {{-- Supprimer --}}
-                                <form method="POST"
-                                      action="{{ route('admin.users.destroy', $user) }}"
+                                <button type="button"
+                                        onclick="ouvrirModalSuppression('{{ $user->id }}', '{{ $user->nom }} {{ $user->prenoms }}')"
+                                        title="Supprimer"
+                                        class="w-8 h-8 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 flex items-center justify-center transition-colors">
+                                    <i class="ti ti-trash text-base"></i>
+                                </button>
+                                <form method="POST" action="{{ route('admin.users.destroy', $user) }}"
                                       id="form-supprimer-{{ $user->id }}">
                                     @csrf @method('DELETE')
-                                    <button type="button"
-                                            onclick="ouvrirModalSuppression('{{ $user->id }}', '{{ $user->nom }} {{ $user->prenoms }}')"
-                                            style="background:#cc0000; color:white; padding:5px 12px;
-                                                   border:none; border-radius:6px; font-size:12px;
-                                                   font-weight:600; cursor:pointer">
-                                        Supprimer
-                                    </button>
                                 </form>
                             @else
                                 {{-- Restaurer --}}
-                                <form method="POST"
-                                      action="{{ route('admin.users.restore', $user->id) }}">
+                                <button type="button"
+                                        onclick="ouvrirModalAction('restaurer', '{{ $user->id }}', '{{ $user->nom }} {{ $user->prenoms }}')"
+                                        title="Restaurer"
+                                        class="w-8 h-8 rounded-lg bg-blue-50 text-[#1a3c6e] hover:bg-blue-100 flex items-center justify-center transition-colors">
+                                    <i class="ti ti-restore text-base"></i>
+                                </button>
+                                <form method="POST" action="{{ route('admin.users.restore', $user->id) }}"
+                                      id="form-restaurer-{{ $user->id }}">
                                     @csrf @method('PATCH')
-                                    <button style="background:#1a3c6e; color:white; padding:5px 12px;
-                                                   border:none; border-radius:6px; font-size:12px;
-                                                   font-weight:600; cursor:pointer">
-                                        Restaurer
-                                    </button>
                                 </form>
                             @endif
                         </div>
@@ -183,97 +148,87 @@
                 </tr>
                 @empty
                     <tr>
-                        <td colspan="5" style="padding:20px 16px; color:#666; text-align:center">
-                            Aucun professeur traité.
-                        </td>
+                        <td colspan="5" class="px-4 py-8 text-center text-gray-400 text-sm">Aucun professeur traité.</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
+    </div>
 
-        {{-- Pagination simple --}}
-        @if($toutProfesseur->hasPages())
-            <div style="display:flex; justify-content:center; align-items:center;
-                        gap:8px; margin-top:20px; padding-top:16px;
-                        border-top:1px solid #f0f0f0">
-                @if($toutProfesseur->onFirstPage())
-                    <span style="padding:6px 14px; border-radius:6px; font-size:13px;
-                                 color:#adb5bd; border:1px solid #e9ecef">
-                        ← Précédent
-                    </span>
-                @else
-                    <a href="{{ $toutProfesseur->previousPageUrl() }}"
-                       style="padding:6px 14px; border-radius:6px; font-size:13px;
-                              color:#1a3c6e; border:1px solid #1a3c6e; text-decoration:none;
-                              font-weight:600">
-                        ← Précédent
-                    </a>
-                @endif
+    {{-- Pagination --}}
+    @if($toutProfesseur->hasPages())
+        <div class="flex items-center justify-center gap-3 mt-5 pt-4 border-t border-gray-100">
+            @if($toutProfesseur->onFirstPage())
+                <span class="px-3 py-1.5 text-xs text-gray-300 border border-gray-200 rounded-lg">← Précédent</span>
+            @else
+                <a href="{{ $toutProfesseur->previousPageUrl() }}"
+                   class="px-3 py-1.5 text-xs text-[#1a3c6e] border border-[#1a3c6e] rounded-lg hover:bg-blue-50">← Précédent</a>
+            @endif
+            <span class="text-xs text-gray-500">Page {{ $toutProfesseur->currentPage() }} / {{ $toutProfesseur->lastPage() }}</span>
+            @if($toutProfesseur->hasMorePages())
+                <a href="{{ $toutProfesseur->nextPageUrl() }}"
+                   class="px-3 py-1.5 text-xs text-[#1a3c6e] border border-[#1a3c6e] rounded-lg hover:bg-blue-50">Suivant →</a>
+            @else
+                <span class="px-3 py-1.5 text-xs text-gray-300 border border-gray-200 rounded-lg">Suivant →</span>
+            @endif
+        </div>
+    @endif
+</div>
 
-                <span style="font-size:13px; color:#666">
-                    Page {{ $toutProfesseur->currentPage() }} / {{ $toutProfesseur->lastPage() }}
-                </span>
-
-                @if($toutProfesseur->hasMorePages())
-                    <a href="{{ $toutProfesseur->nextPageUrl() }}"
-                       style="padding:6px 14px; border-radius:6px; font-size:13px;
-                              color:#1a3c6e; border:1px solid #1a3c6e; text-decoration:none;
-                              font-weight:600">
-                        Suivant →
-                    </a>
-                @else
-                    <span style="padding:6px 14px; border-radius:6px; font-size:13px;
-                                 color:#adb5bd; border:1px solid #e9ecef">
-                        Suivant →
-                    </span>
-                @endif
+{{-- ══ MODAL ACTION (valider, rejeter, désactiver, réactiver, restaurer) ══ --}}
+<div id="modal-action"
+     class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl overflow-hidden max-w-sm w-full mx-4 shadow-2xl">
+        <div class="flex flex-col items-center pt-8 pb-4 px-6">
+            <div id="action-icon-container"
+                 class="w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                <i id="action-icon" class="text-3xl"></i>
             </div>
-        @endif
+            <h3 id="action-title" class="text-lg font-bold text-[#1a2b4a] text-center mb-1"></h3>
+            <p class="text-sm text-gray-400 text-center mb-2">Professeur concerné :</p>
+            <div class="bg-gray-50 border border-gray-200 rounded-xl px-5 py-3 w-full text-center">
+                <p id="action-nom" class="text-base font-bold text-[#1a2b4a]"></p>
+            </div>
+            <p id="action-message" class="text-sm text-gray-500 text-center mt-4 leading-relaxed"></p>
+        </div>
+        <div class="px-6 pb-6 flex gap-3">
+            <button onclick="fermerModalAction()"
+                    class="flex-1 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
+                Annuler
+            </button>
+            <button id="btn-confirmer-action"
+                    class="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors">
+                Confirmer
+            </button>
+        </div>
     </div>
 </div>
 
-{{-- Modal confirmation suppression --}}
+{{-- ══ MODAL SUPPRESSION ══ --}}
 <div id="modal-suppression"
-     style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-            background:rgba(0,0,0,0.5); z-index:1000;
-            justify-content:center; align-items:center">
-    <div style="background:white; border-radius:12px; padding:0;
-                max-width:420px; width:90%; overflow:hidden;
-                box-shadow:0 20px 60px rgba(0,0,0,0.3)">
-
-        <div style="background:#cc0000; padding:20px 24px">
-            <p style="color:white; font-weight:700; font-size:18px; margin:0">
-                ⚠️ Confirmer la suppression
+     class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl overflow-hidden max-w-sm w-full mx-4 shadow-2xl">
+        <div class="flex flex-col items-center pt-8 pb-4 px-6">
+            <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                <i class="ti ti-trash text-3xl text-red-600"></i>
+            </div>
+            <h3 class="text-lg font-bold text-[#1a2b4a] text-center mb-1">Supprimer le compte</h3>
+            <p class="text-sm text-gray-400 text-center mb-2">Professeur concerné :</p>
+            <div class="bg-gray-50 border border-gray-200 rounded-xl px-5 py-3 w-full text-center">
+                <p id="modal-nom-prof" class="text-base font-bold text-[#1a2b4a]"></p>
+            </div>
+            <p class="text-sm text-gray-500 text-center mt-4 leading-relaxed">
+                📌 Les réservations et séances seront conservées.<br>
+                Cette action peut être annulée via <strong>Restaurer</strong>.
             </p>
         </div>
-
-        <div style="padding:24px">
-            <p style="color:#333; font-size:15px; margin:0 0 8px 0">
-                Vous êtes sur le point de supprimer le compte de :
-            </p>
-            <p id="modal-nom-prof"
-               style="color:#1a2b4a; font-size:16px; font-weight:700;
-                      margin:0 0 16px 0; padding:12px 16px;
-                      background:#f5f7fa; border-radius:8px;
-                      border-left:4px solid #cc0000">
-            </p>
-            <p style="color:#666; font-size:13px; margin:0">
-                📌 Les réservations et séances de ce professeur seront conservées.
-                Cette action peut être annulée via le bouton <strong>Restaurer</strong>.
-            </p>
-        </div>
-
-        <div style="padding:16px 24px 24px; display:flex; gap:12px; justify-content:flex-end">
+        <div class="px-6 pb-6 flex gap-3">
             <button onclick="fermerModalSuppression()"
-                    style="padding:10px 24px; border:1px solid #ddd; border-radius:6px;
-                           font-size:14px; font-weight:600; color:#555;
-                           background:white; cursor:pointer">
+                    class="flex-1 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
                 Annuler
             </button>
             <button id="btn-confirmer-suppression"
-                    style="padding:10px 24px; background:#cc0000; color:white;
-                           border:none; border-radius:6px; font-size:14px;
-                           font-weight:600; cursor:pointer">
+                    class="flex-1 py-2.5 bg-red-700 hover:bg-red-800 text-white rounded-xl text-sm font-semibold transition-colors">
                 Oui, supprimer
             </button>
         </div>
@@ -281,20 +236,91 @@
 </div>
 
 <script>
-    function ouvrirModalSuppression(userId, nomProf) {
-        document.getElementById('modal-nom-prof').textContent = nomProf;
-        document.getElementById('btn-confirmer-suppression').onclick = function() {
-            document.getElementById('form-supprimer-' + userId).submit();
-        };
-        document.getElementById('modal-suppression').style.display = 'flex';
-    }
+const configs = {
+    valider: {
+        icon: 'ti-circle-check', iconBg: 'bg-green-100', iconColor: 'text-green-600',
+        title: 'Valider le compte',
+        message: 'Ce professeur pourra se connecter et accéder à la plateforme.',
+        btnClass: 'bg-green-600 hover:bg-green-700',
+        formPrefix: 'form-valider'
+    },
+    rejeter: {
+        icon: 'ti-circle-x', iconBg: 'bg-red-100', iconColor: 'text-red-600',
+        title: 'Rejeter le compte',
+        message: 'Ce professeur ne pourra pas accéder à la plateforme.',
+        btnClass: 'bg-red-600 hover:bg-red-700',
+        formPrefix: 'form-rejeter'
+    },
+    desactiver: {
+        icon: 'ti-player-pause', iconBg: 'bg-amber-100', iconColor: 'text-amber-600',
+        title: 'Désactiver le compte',
+        message: 'Ce professeur ne pourra plus se connecter. Ses données sont conservées.',
+        btnClass: 'bg-amber-500 hover:bg-amber-600',
+        formPrefix: 'form-toggle'
+    },
+    reactiver: {
+        icon: 'ti-player-play', iconBg: 'bg-green-100', iconColor: 'text-green-600',
+        title: 'Réactiver le compte',
+        message: 'Ce professeur pourra à nouveau se connecter à la plateforme.',
+        btnClass: 'bg-green-600 hover:bg-green-700',
+        formPrefix: 'form-toggle'
+    },
+    restaurer: {
+        icon: 'ti-restore', iconBg: 'bg-blue-100', iconColor: 'text-[#1a3c6e]',
+        title: 'Restaurer le compte',
+        message: 'Le compte sera restauré avec le statut validé.',
+        btnClass: 'bg-[#1a3c6e] hover:bg-blue-900',
+        formPrefix: 'form-restaurer'
+    },
+};
 
-    function fermerModalSuppression() {
-        document.getElementById('modal-suppression').style.display = 'none';
-    }
+function ouvrirModalAction(type, userId, nomProf) {
+    const c = configs[type];
+    const modal = document.getElementById('modal-action');
+    const container = document.getElementById('action-icon-container');
+    const icon = document.getElementById('action-icon');
 
-    document.getElementById('modal-suppression').addEventListener('click', function(e) {
-        if (e.target === this) fermerModalSuppression();
-    });
+    container.className = `w-16 h-16 rounded-full flex items-center justify-center mb-4 ${c.iconBg}`;
+    icon.className = `ti ${c.icon} text-3xl ${c.iconColor}`;
+    document.getElementById('action-title').textContent = c.title;
+    document.getElementById('action-nom').textContent = nomProf;
+    document.getElementById('action-message').textContent = c.message;
+
+    const btn = document.getElementById('btn-confirmer-action');
+    btn.className = `flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors ${c.btnClass}`;
+    btn.onclick = function() {
+        document.getElementById(c.formPrefix + '-' + userId).submit();
+    };
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function fermerModalAction() {
+    const modal = document.getElementById('modal-action');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+function ouvrirModalSuppression(userId, nomProf) {
+    document.getElementById('modal-nom-prof').textContent = nomProf;
+    document.getElementById('btn-confirmer-suppression').onclick = function() {
+        document.getElementById('form-supprimer-' + userId).submit();
+    };
+    document.getElementById('modal-suppression').classList.remove('hidden');
+    document.getElementById('modal-suppression').classList.add('flex');
+}
+
+function fermerModalSuppression() {
+    document.getElementById('modal-suppression').classList.add('hidden');
+    document.getElementById('modal-suppression').classList.remove('flex');
+}
+
+document.getElementById('modal-action').addEventListener('click', function(e) {
+    if (e.target === this) fermerModalAction();
+});
+document.getElementById('modal-suppression').addEventListener('click', function(e) {
+    if (e.target === this) fermerModalSuppression();
+});
 </script>
 @endsection
