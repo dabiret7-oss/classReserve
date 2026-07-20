@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CahierController as AdminCahierController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Professeur\ReservationController;
 use App\Http\Controllers\Professeur\CahierController as ProfCahierController;
 use App\Http\Controllers\ProfilController;
@@ -33,7 +34,8 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
-    Route::get('/dashboard', fn() => view('admin.dashboard'))->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class,'index'])->name('dashboard');
+    
     Route::get('/calendrier', [AdminReservationController::class, 'calendrier'])->name('calendrier');
 
     // Utilisateurs
