@@ -51,16 +51,23 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/salles/create', [SalleController::class, 'create'])->name('salles.create');
     Route::post('/salles', [SalleController::class, 'store'])->name('salles.store');
     Route::patch('/salles/{salle}/toggle', [SalleController::class, 'toggleStatut'])->name('salles.toggle');
+    Route::get('/salles/{salle}/edit', [SalleController::class, 'edit'])->name('salles.edit');
+Route::patch('/salles/{salle}', [SalleController::class, 'update'])->name('salles.update');
 
     // Matières
     Route::get('/matieres', [MatiereController::class, 'index'])->name('matieres.index');
     Route::post('/matieres', [MatiereController::class, 'store'])->name('matieres.store');
     Route::delete('/matieres/{matiere}', [MatiereController::class, 'destroy'])->name('matieres.destroy');
+    Route::get('/matieres/{matiere}/edit', [MatiereController::class, 'edit'])->name('matieres.edit');
+    Route::patch('/matieres/{matiere}', [MatiereController::class, 'update'])->name('matieres.update');
+
 
     // Classes
     Route::get('/classes', [ClasseController::class, 'index'])->name('classes.index');
     Route::post('/classes', [ClasseController::class, 'store'])->name('classes.store');
     Route::delete('/classes/{classe}', [ClasseController::class, 'destroy'])->name('classes.destroy');
+    Route::get('/classes/{classe}/edit', [ClasseController::class, 'edit'])->name('classes.edit');
+    Route::patch('/classes/{classe}', [ClasseController::class, 'update'])->name('classes.update');
 
     // Réservations
     Route::get('/reservations', [AdminReservationController::class, 'index'])->name('reservations.index');
