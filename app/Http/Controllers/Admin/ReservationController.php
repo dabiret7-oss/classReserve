@@ -76,41 +76,140 @@ class ReservationController extends Controller
         return view('admin.reservations.create', compact('professeurs', 'salles'));
     }
 
-    // Enregistrer attribution directe (Cas 2)
+
+
     public function store(Request $request)
     {
+        $estExterne     = $request->boolean('activite_externe');
+        $estLongPeriode = $request->boolean('longue_periode');
+
         $request->validate([
-            'user_id'    => 'required|exists:users,id',
-            'salle_id'   => 'required|exists:salles,id',
-            'date_debut' => 'required|date|after:now',
-            'heure_fin'  => 'required',
-            'motif'      => 'required|string|max:255',
+            'user_id'          => $estExterne ? 'nullable' : 'required|exists:users,id',
+            'salle_id'         => 'required|exists:salles,id',
+            'date_debut'       => 'required|date',
+            'heure_fin'        => 'required',
+            'motif'            => 'required|string|max:255',
+            'date_fin_periode' => $estLongPeriode ? 'required|date|after:date_debut' : 'nullable',
         ], [
-            'user_id.required'    => 'Veuillez choisir un professeur.',
-            'salle_id.required'   => 'Veuillez choisir une salle.',
-            'date_debut.required' => 'La date de début est obligatoire.',
-            'date_debut.after'    => 'La date doit être dans le futur.',
-            'heure_fin.required'  => 'L\'heure de fin est obligatoire.',
-            'motif.required'      => 'Le motif est obligatoire.',
+            'user_id.required'          => 'Veuillez choisir un professeur.',
+            'salle_id.required'         => 'Veuillez choisir une salle.',
+            'date_debut.required'       => 'La date de début est obligatoire.',
+            'heure_fin.required'        => 'L\'heure de fin est obligatoire.',
+            'motif.required'            => 'Le motif est obligatoire.',
+            'date_fin_periode.required' => 'La date de fin est obligatoire pour une longue période.',
+            'date_fin_periode.after'    => 'La date de fin doit être après la date de début.',
         ]);
 
-        $reservation = Reservation::create([
-            'user_id'    => $request->user_id,
-            'salle_id'   => $request->salle_id,
-            'date_debut' => $request->date_debut,
-            'heure_fin'  => $request->heure_fin,
-            'motif'      => $request->motif,
-            'statut'     => 'validee',
-        ]);
+        // ── LONGUE PÉRIODE ──
+        if ($estLongPeriode) {
+            $dateDebut = \Carbon\Carbon::parse($request->date_debut);
+            $dateFin   = \Carbon\Carbon::parse($request->date_fin_periode);
+            $heureFin  = $request->heure_fin;
+            $conflicts = [];
 
-        $reservation->load(['user', 'salle']);
+            // Vérifier les conflits pour chaque jour
+            $current = $dateDebut->copy();
+            while ($current->lte($dateFin)) {
+                $debutJour = $current->format('Y-m-d') . ' ' . $dateDebut->format('H:i:s');
+                $finJour   = $current->format('Y-m-d') . ' ' . $heureFin;
 
-        // Notifier le professeur
-        $reservation->user->notify(new SalleAttribuee($reservation));
+                $conflit = Reservation::where('salle_id', $request->salle_id)
+                    ->where('statut', '!=', 'rejetee')
+                    ->where(function ($q) use ($debutJour, $finJour) {
+                        $q->where('date_debut','<', $finJour)
+                        ->WhereRaw("CONCAT(DATE(date_debut), ' ', heure_fin) > ?", [$debutJour]);
+                    })->exists();
 
-        return redirect()->route('admin.reservations.index')
-            ->with('success',
-                "Salle {$reservation->salle->nom} attribuée à {$reservation->user->nom} pour {$reservation->motif}.");
+                if ($conflit) {
+                    $conflicts[] = $current->locale('fr')->isoFormat('ddd D MMM');
+                }
+                $current->addDay();
+            }
+
+            if (!empty($conflicts)) {
+                $liste = implode(', ', array_slice($conflicts, 0, 3));
+                $plus  = count($conflicts) > 3 ? ' (+' . (count($conflicts) - 3) . ')' : '';
+                return back()->withInput()->withErrors([
+                    'date_debut' => "Conflits détectés : {$liste}{$plus}. La salle est déjà occupée sur ces jours."
+                ]);
+            }
+
+            // Créer les réservations
+            $groupeId = \Illuminate\Support\Str::uuid();
+            $current  = $dateDebut->copy();
+            $created  = 0;
+
+            while ($current->lte($dateFin)) {
+                Reservation::create([
+                    'user_id'          => $request->user_id ?? null,
+                    'salle_id'         => $request->salle_id,
+                    'matiere_id'       => $request->matiere_id ?? null,
+                    'classe_id'        => $request->classe_id ?? null,
+                    'date_debut'       => $current->format('Y-m-d') . ' ' . $dateDebut->format('H:i:s'),
+                    'heure_fin'        => $heureFin,
+                    'motif'            => $request->motif,
+                    'statut'           => 'validee',
+                    'longue_periode'   => true,
+                    'date_fin_periode' => $dateFin->format('Y-m-d'),
+                    'groupe_id'        => $groupeId,
+                ]);
+                $created++;
+                $current->addDay();
+            }
+
+            // Notifier le professeur si défini
+            if ($request->user_id) {
+                $resa = Reservation::where('groupe_id', $groupeId)->with(['user','salle'])->first();
+                $resa->user->notify(new \App\Notifications\SalleAttribuee($resa));
+            }
+
+            $nom = $request->user_id
+                ? \App\Models\User::find($request->user_id)->nom
+                : 'Activité externe';
+
+            return redirect()->route('admin.reservations.index')
+                ->with('success', "{$created} réservation(s) créée(s) du {$dateDebut->format('d/m/Y')} au {$dateFin->format('d/m/Y')} — {$nom}.");
+
+        // ── RÉSERVATION SIMPLE ou ACTIVITÉ EXTERNE ──
+        } else {
+            $dateDebut = $request->date_debut;
+            $dateFin   = date('Y-m-d', strtotime($dateDebut)) . ' ' . $request->heure_fin;
+
+            $conflit = Reservation::where('salle_id', $request->salle_id)
+                ->where('statut', '!=', 'rejetee')
+                ->where(function ($q) use ($dateDebut, $dateFin) {
+                    $q->where('date_debut','<', $dateFin)
+                    ->WhereRaw("CONCAT(DATE(date_debut), ' ', heure_fin) > ?", [$dateDebut]);
+                })->exists();
+
+            if ($conflit) {
+                return back()->withInput()->withErrors([
+                    'date_debut' => 'Cette salle est déjà réservée sur cette plage horaire.'
+                ]);
+            }
+
+            $reservation = Reservation::create([
+                'user_id'    => $request->user_id ?? null,
+                'salle_id'   => $request->salle_id,
+                'matiere_id' => $request->matiere_id ?? null,
+                'classe_id'  => $request->classe_id ?? null,
+                'date_debut' => $request->date_debut,
+                'heure_fin'  => $request->heure_fin,
+                'motif'      => $request->motif,
+                'statut'     => 'validee',
+            ]);
+
+            // Notifier si professeur défini
+            if ($reservation->user_id) {
+                $reservation->load(['user', 'salle']);
+                $reservation->user->notify(new \App\Notifications\SalleAttribuee($reservation));
+                $msg = "Salle {$reservation->salle->nom} attribuée à {$reservation->user->nom}.";
+            } else {
+                $msg = "Salle réservée pour activité externe : {$reservation->motif}.";
+            }
+
+            return redirect()->route('admin.reservations.index')->with('success', $msg);
+        }
     }
 
 

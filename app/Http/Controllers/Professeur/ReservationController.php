@@ -60,15 +60,21 @@ class ReservationController extends Controller
         $conflitDebut = $request->date_debut;
         $conflitFin   = $heureFin->format('Y-m-d H:i:s');
 
+
         $conflit = Reservation::where('salle_id', $request->salle_id)
             ->where('statut', '!=', 'rejetee')
             ->where(function ($query) use ($conflitDebut, $conflitFin) {
-                $query->whereBetween('date_debut', [$conflitDebut, $conflitFin])
-                      ->orWhereRaw(
-                          "ADDTIME(DATE(date_debut), heure_fin) > ? AND date_debut < ?",
-                          [$conflitDebut, $conflitFin]
-                      );
+                $query->where('date_debut', '<', $conflitFin)
+                      ->whereRaw("CONCAT(DATE(date_debut), ' ', heure_fin) > ?", [$conflitDebut]);
             })->exists();
+
+
+
+
+
+
+
+
 
         if ($conflit) {
             return back()->withInput()->withErrors([

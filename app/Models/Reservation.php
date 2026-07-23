@@ -15,6 +15,10 @@ class Reservation extends Model
         'heure_fin',
         'motif',
         'statut',
+        'longue_periode',
+        'date_fin_periode',
+        'groupe_id',
+        
     ];
 
     public function user()

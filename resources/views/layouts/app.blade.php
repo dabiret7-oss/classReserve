@@ -162,13 +162,6 @@
                 <p class="text-xs text-gray-400">{{ \Carbon\Carbon::now()->locale('fr')->isoFormat('dddd D MMMM YYYY') }}</p>
             </div>
             <div class="flex items-center gap-2.5">
-                {{-- Recherche --}}
-                <div class="hidden md:flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
-                    <i class="ti ti-search text-gray-400 text-base"></i>
-                    <input type="text" placeholder="Rechercher..."
-                           class="bg-transparent text-sm text-gray-700 outline-none w-36 font-sans">
-                </div>
-
                 @if(!auth()->user()->isAdmin())
                     {{-- Cloche professeur --}}
                     @php $notifications = auth()->user()->unreadNotifications; $nbNotifs = $notifications->count(); @endphp
