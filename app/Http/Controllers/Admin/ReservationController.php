@@ -113,17 +113,15 @@ class ReservationController extends Controller
                 $debutJour = $current->format('Y-m-d') . ' ' . $dateDebut->format('H:i:s');
                 $finJour   = $current->format('Y-m-d') . ' ' . $heureFin;
 
+                $dateJour   = $current->format('Y-m-d');
+                $heureDebut = $dateDebut->format('H:i:s');
+
                 $conflit = Reservation::where('salle_id', $request->salle_id)
                     ->where('statut', '!=', 'rejetee')
-                    ->where(function ($q) use ($debutJour, $finJour) {
-                        $q->where('date_debut','<', $finJour)
-                        ->WhereRaw("CONCAT(DATE(date_debut), ' ', heure_fin) > ?", [$debutJour]);
-                    })->exists();
-
-                if ($conflit) {
-                    $conflicts[] = $current->locale('fr')->isoFormat('ddd D MMM');
-                }
-                $current->addDay();
+                    ->whereDate('date_debut', $dateJour)
+                    ->where('heure_fin', '>', $heureDebut)
+                    ->whereRaw('TIME(date_debut) < ?', [$heureFin])
+                    ->exists();
             }
 
             if (!empty($conflicts)) {
@@ -171,16 +169,21 @@ class ReservationController extends Controller
                 ->with('success', "{$created} réservation(s) créée(s) du {$dateDebut->format('d/m/Y')} au {$dateFin->format('d/m/Y')} — {$nom}.");
 
         // ── RÉSERVATION SIMPLE ou ACTIVITÉ EXTERNE ──
-        } else {
-            $dateDebut = $request->date_debut;
-            $dateFin   = date('Y-m-d', strtotime($dateDebut)) . ' ' . $request->heure_fin;
-
-            $conflit = Reservation::where('salle_id', $request->salle_id)
-                ->where('statut', '!=', 'rejetee')
-                ->where(function ($q) use ($dateDebut, $dateFin) {
-                    $q->where('date_debut','<', $dateFin)
-                    ->WhereRaw("CONCAT(DATE(date_debut), ' ', heure_fin) > ?", [$dateDebut]);
-                })->exists();
+    } else {
+        $dateResa   = \Carbon\Carbon::parse($request->date_debut)->format('Y-m-d');
+        $heureDebut = \Carbon\Carbon::parse($request->date_debut)->format('H:i:s');
+        $heureFin   = $request->heure_fin;
+        $conflit = Reservation::where('salle_id', $request->salle_id)
+            ->where('statut', '!=', 'rejetee')
+            ->whereDate('date_debut', $dateResa)
+            ->where('heure_fin', '>', $heureDebut)
+            ->whereRaw('TIME(date_debut) < ?', [$heureFin])
+            ->exists();
+        if ($conflit) {
+            return back()->withInput()->withErrors([
+                'date_debut' => 'Cette salle est déjà réservée sur cette plage horaire.'
+            ]);
+        }
 
             if ($conflit) {
                 return back()->withInput()->withErrors([
