@@ -52,7 +52,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('/salles', [SalleController::class, 'store'])->name('salles.store');
     Route::patch('/salles/{salle}/toggle', [SalleController::class, 'toggleStatut'])->name('salles.toggle');
     Route::get('/salles/{salle}/edit', [SalleController::class, 'edit'])->name('salles.edit');
-Route::patch('/salles/{salle}', [SalleController::class, 'update'])->name('salles.update');
+    Route::patch('/salles/{salle}', [SalleController::class, 'update'])->name('salles.update');
 
     // Matières
     Route::get('/matieres', [MatiereController::class, 'index'])->name('matieres.index');
@@ -87,6 +87,13 @@ Route::patch('/salles/{salle}', [SalleController::class, 'update'])->name('salle
     Route::patch('/cahiers/acces/{acces}/valider', [AdminCahierController::class, 'validerAcces'])->name('cahiers.acces.valider');
     Route::patch('/cahiers/acces/{acces}/rejeter', [AdminCahierController::class, 'rejeterAcces'])->name('cahiers.acces.rejeter');
     Route::get('/cahiers/{cahier}', [AdminCahierController::class, 'show'])->name('cahiers.show');
+
+
+    Route::get('/import', [App\Http\Controllers\Admin\ImportController::class, 'index'])->name('import.index');
+    Route::post('/import/salles', [App\Http\Controllers\Admin\ImportController::class, 'importSalles'])->name('import.salles');
+    Route::post('/import/matieres', [App\Http\Controllers\Admin\ImportController::class, 'importMatieres'])->name('import.matieres');
+    Route::post('/import/professeurs', [App\Http\Controllers\Admin\ImportController::class, 'importProfesseurs'])->name('import.professeurs');
+    Route::get('/import/modele/{type}', [App\Http\Controllers\Admin\ImportController::class, 'telechargerModele'])->name('import.modele');
 });
 
 Route::prefix('professeur')->name('professeur.')->middleware(['auth', 'professeur'])->group(function () {
@@ -110,4 +117,6 @@ Route::prefix('professeur')->name('professeur.')->middleware(['auth', 'professeu
         auth()->user()->unreadNotifications->markAsRead();
         return back();
     })->name('notifications.lire');
+
+    Route::post('/cahiers/extraire-pdf', [App\Http\Controllers\Professeur\CahierController::class, 'extrairePdf'])->name('cahiers.extraire-pdf');
 });

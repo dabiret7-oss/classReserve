@@ -11,23 +11,19 @@
 
 <div class="flex min-h-screen">
 
-    {{-- ══ BOUTON TOGGLE MOBILE ══ --}}
     @auth
     <button onclick="toggleSidebar()"
             class="lg:hidden fixed top-4 left-4 z-50 bg-[#1a3c6e] text-white w-10 h-10 rounded-lg flex items-center justify-center shadow-lg">
         <i class="ti ti-menu-2 text-xl"></i>
     </button>
 
-    {{-- ══ OVERLAY MOBILE ══ --}}
     <div id="overlay" onclick="toggleSidebar()"
          class="hidden fixed inset-0 bg-black/40 z-30 lg:hidden"></div>
 
-    {{-- ══ SIDEBAR ══ --}}
     <aside id="sidebar"
            class="fixed top-0 left-0 h-full w-56 bg-[#1a3c6e] flex flex-col z-40
                   -translate-x-full lg:translate-x-0 transition-transform duration-300">
 
-        {{-- Logo --}}
         <div class="flex items-center gap-3 px-4 py-5 border-b border-white/10">
             <img src="{{ asset('images/logo-hetec.jpeg') }}" alt="HETEC"
                  class="w-10 h-10 rounded-lg bg-white p-0.5 object-contain flex-shrink-0">
@@ -37,7 +33,6 @@
             </div>
         </div>
 
-        {{-- Navigation --}}
         <nav class="flex-1 px-2 py-3 overflow-y-auto">
             @auth
             @if(auth()->user()->isAdmin())
@@ -92,6 +87,11 @@
                     @php $ca = \App\Models\CahierAcces::where('statut','en_attente')->count() @endphp
                     @if($ca > 0)<span class="ml-auto bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ $ca }}</span>@endif
                 </a>
+                <a href="{{ route('admin.import.index') }}"
+                   class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium mb-0.5 transition-colors
+                          {{ request()->routeIs('admin.import.*') ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
+                    <i class="ti ti-file-upload text-lg"></i> Import CSV
+                </a>
 
                 <p class="text-[10px] text-white/35 uppercase tracking-widest px-2 pt-4 pb-1 font-semibold">Compte</p>
                 <a href="{{ route('profil.index') }}"
@@ -134,7 +134,6 @@
             @endauth
         </nav>
 
-        {{-- Footer sidebar --}}
         @auth
         <div class="px-3 py-3 border-t border-white/10">
             <div class="flex items-center gap-2.5">
@@ -151,10 +150,8 @@
     </aside>
     @endauth
 
-    {{-- ══ ZONE PRINCIPALE ══ --}}
     <div class="flex-1 flex flex-col min-h-screen lg:ml-56">
 
-        {{-- TOPBAR --}}
         @auth
         <header class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 sticky top-0 z-20">
             <div class="pl-10 lg:pl-0">
@@ -163,9 +160,8 @@
             </div>
             <div class="flex items-center gap-2.5">
                 @if(!auth()->user()->isAdmin())
-                    {{-- Cloche professeur --}}
                     @php $notifications = auth()->user()->unreadNotifications; $nbNotifs = $notifications->count(); @endphp
-                    <div class="relative" tabindex="0" x-data>
+                    <div class="relative" tabindex="0">
                         <div class="w-9 h-9 rounded-lg border border-gray-200 bg-white flex items-center justify-center cursor-pointer relative hover:bg-gray-50">
                             <i class="ti ti-bell text-gray-500 text-lg"></i>
                             @if($nbNotifs > 0)
@@ -221,9 +217,7 @@
         </header>
         @endauth
 
-        {{-- CONTENU --}}
         <main class="flex-1 p-6">
-            {{-- Alertes auto-disparaissantes --}}
             @if(session('success'))
                 <div id="alert-success"
                      class="flex items-center gap-3 bg-green-50 text-green-800 border-l-4 border-green-500 px-4 py-3 rounded-lg mb-5 text-sm transition-all duration-300">
@@ -249,7 +243,6 @@
             @yield('content')
         </main>
 
-        {{-- FOOTER --}}
         <footer class="bg-[#1a3c6e] border-t-4 border-red-700 text-center py-4 text-xs text-white/60">
             © {{ date('Y') }} <strong class="text-white">HETEC</strong> — Hautes Études TEchnologiques et Commerciales. Tous droits réservés.
         </footer>
@@ -257,7 +250,6 @@
 </div>
 
 <script>
-// Sidebar mobile
 function toggleSidebar() {
     const sb = document.getElementById('sidebar');
     const ov = document.getElementById('overlay');
@@ -266,7 +258,6 @@ function toggleSidebar() {
     ov.classList.toggle('hidden');
 }
 
-// Auto-hide alertes après 3 secondes
 function autoHide(id) {
     const el = document.getElementById(id);
     if (!el) return;

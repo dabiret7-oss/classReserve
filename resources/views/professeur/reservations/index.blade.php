@@ -25,16 +25,16 @@
                         <p class="text-sm font-bold text-[#1a2b4a]">{{ $reservation->motif }}</p>
                         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
                             <span class="text-xs text-gray-400">
-                                📚 {{ $reservation->matiere?->nom ?? '—' }}
+                                 {{ $reservation->matiere?->nom ?? '—' }}
                             </span>
                             <span class="text-xs text-gray-400">
                                 👥 {{ $reservation->classe?->nom ?? '—' }}
                             </span>
                             <span class="text-xs text-gray-400">
-                                📍 {{ $reservation->salle->nom }} — {{ $reservation->salle->niveau }}
+                                 {{ $reservation->salle->nom }} — {{ $reservation->salle->niveau }}
                             </span>
                             <span class="text-xs text-gray-400">
-                                🕐 {{ \Carbon\Carbon::parse($reservation->date_debut)->format('d/m/Y à H\hi') }}
+                                 {{ \Carbon\Carbon::parse($reservation->date_debut)->format('d/m/Y à H\hi') }}
                                 → {{ \Carbon\Carbon::parse($reservation->heure_fin)->format('H\hi') }}
                             </span>
                         </div>

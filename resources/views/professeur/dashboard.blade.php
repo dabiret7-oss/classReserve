@@ -18,7 +18,7 @@
 <div class="bg-[#1a3c6e] rounded-xl p-6 mb-6 flex items-center justify-between">
     <div>
         <h2 class="text-xl font-bold text-white mb-1">
-            Bonjour, {{ $user->nom }} {{ $user->prenoms }} 👋
+            Bonjour, {{ $user->nom }} {{ $user->prenoms }} 
         </h2>
         <p class="text-white/70 text-sm">Bienvenue sur votre espace de réservation de salles.</p>
     </div>
@@ -39,12 +39,12 @@
         <p class="text-xs text-[#1a3c6e] font-semibold uppercase tracking-wide mb-0.5">Prochaine séance</p>
         <p class="text-sm font-bold text-[#1a2b4a]">{{ $prochaine->motif }}</p>
         <p class="text-xs text-gray-500 mt-0.5">
-            📍 {{ $prochaine->salle->nom }} — {{ $prochaine->salle->niveau }}
+             {{ $prochaine->salle->nom }} — {{ $prochaine->salle->niveau }}
             &nbsp;|&nbsp;
             🕐 {{ \Carbon\Carbon::parse($prochaine->date_debut)->format('d/m/Y à H\hi') }}
         </p>
     </div>
-    <span class="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full flex-shrink-0">
+    <span class="bg-blue-100 text-[#1a3c6e] text-xs font-semibold px-3 py-1 rounded-full flex-shrink-0">
         Validée ✓
     </span>
 </div>
@@ -66,32 +66,32 @@
     </div>
 
     <div class="bg-white rounded-xl border border-gray-200 p-5 relative overflow-hidden">
-        <div class="absolute top-0 left-0 right-0 h-1 bg-green-500 rounded-t-xl"></div>
-        <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-3">
-            <i class="ti ti-circle-check text-xl text-green-600"></i>
+        <div class="absolute top-0 left-0 right-0 h-1 bg-[#1a3c6e] rounded-t-xl"></div>
+        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
+            <i class="ti ti-circle-check text-xl text-[#1a3c6e]"></i>
         </div>
         <div class="text-3xl font-bold text-[#1a2b4a]">{{ $nbValidees }}</div>
         <div class="text-sm text-gray-500 mt-1">Validées</div>
     </div>
 
     <div class="bg-white rounded-xl border border-gray-200 p-5 relative overflow-hidden">
-        <div class="absolute top-0 left-0 right-0 h-1 bg-orange-400 rounded-t-xl"></div>
-        <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center mb-3">
-            <i class="ti ti-clock text-xl text-orange-500"></i>
+        <div class="absolute top-0 left-0 right-0 h-1 bg-[#1a3c6e] rounded-t-xl"></div>
+        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
+            <i class="ti ti-clock text-xl text-[#1a3c6e]"></i>
         </div>
         <div class="text-3xl font-bold text-[#1a2b4a]">{{ $nbEnAttente }}</div>
         <div class="text-sm text-gray-500 mt-1">En attente</div>
     </div>
 
     <div class="bg-white rounded-xl border border-gray-200 p-5 relative overflow-hidden">
-        <div class="absolute top-0 left-0 right-0 h-1 bg-purple-500 rounded-t-xl"></div>
-        <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center mb-3">
-            <i class="ti ti-notebook text-xl text-purple-600"></i>
+        <div class="absolute top-0 left-0 right-0 h-1 bg-[#1a3c6e] rounded-t-xl"></div>
+        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
+            <i class="ti ti-notebook text-xl text-[#1a3c6e]"></i>
         </div>
         <div class="text-3xl font-bold text-[#1a2b4a]">{{ $nbCahiers }}</div>
         <div class="text-sm text-gray-500 mt-1">Cahiers accessibles</div>
         <a href="{{ route('professeur.cahiers.index') }}"
-           class="inline-flex items-center gap-1 text-xs text-purple-600 font-medium mt-3 hover:underline">
+           class="inline-flex items-center gap-1 text-xs text-[#1a3c6e] font-medium mt-3 hover:underline">
             Accéder <i class="ti ti-arrow-right text-xs"></i>
         </a>
     </div>
@@ -122,7 +122,7 @@
                     <p class="text-sm font-semibold text-[#1a2b4a] truncate">{{ $reservation->motif }}</p>
                     <div class="flex flex-wrap items-center gap-2 mt-0.5">
                         <span class="text-xs text-gray-400">
-                            📍 {{ $reservation->salle->nom }} — {{ $reservation->salle->niveau }}
+                             {{ $reservation->salle->nom }} — {{ $reservation->salle->niveau }}
                         </span>
                         @if($reservation->matiere)
                             <span class="text-xs text-gray-400">📚 {{ $reservation->matiere->nom }}</span>
@@ -145,7 +145,7 @@
                             </button>
                         </form>
                     @elseif($reservation->statut === 'validee')
-                        <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-1 rounded-full">Validée ✓</span>
+                        <span class="bg-blue-100 text-[#1a3c6e] text-xs font-semibold px-2.5 py-1 rounded-full">Validée ✓</span>
                         <a href="{{ route('professeur.cahiers.index') }}"
                            class="w-7 h-7 rounded-lg bg-blue-50 text-[#1a3c6e] hover:bg-blue-100 flex items-center justify-center transition-colors"
                            title="Cahiers">
@@ -194,8 +194,8 @@
                     <i class="ti ti-chevron-right text-gray-400 text-sm ml-auto"></i>
                 </a>
                 <a href="{{ route('professeur.cahiers.index') }}"
-                   class="flex items-center gap-3 p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
-                    <div class="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center">
+                   class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                    <div class="w-8 h-8 rounded-lg bg-[#1a3c6e] flex items-center justify-center">
                         <i class="ti ti-notebook text-white text-sm"></i>
                     </div>
                     <div>
@@ -205,8 +205,8 @@
                     <i class="ti ti-chevron-right text-gray-400 text-sm ml-auto"></i>
                 </a>
                 <a href="{{ route('professeur.calendrier') }}"
-                   class="flex items-center gap-3 p-3 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
-                    <div class="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center">
+                   class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                    <div class="w-8 h-8 rounded-lg bg-[#1a3c6e] flex items-center justify-center">
                         <i class="ti ti-calendar text-white text-sm"></i>
                     </div>
                     <div>
@@ -234,21 +234,21 @@
             <h2 class="text-base font-semibold text-[#1a2b4a] mb-4">Mes statistiques</h2>
             @if($nbResas > 0)
                 <div class="h-2 rounded-full overflow-hidden flex mb-3">
-                    <div class="bg-green-500 h-full" style="width:{{ round($nbValidees/$nbResas*100) }}%"></div>
-                    <div class="bg-orange-400 h-full" style="width:{{ round($nbEnAttente/$nbResas*100) }}%"></div>
+                    <div class="bg-[#1a3c6e] h-full" style="width:{{ round($nbValidees/$nbResas*100) }}%"></div>
+                    <div class="bg-[#1a3c6e] h-full" style="width:{{ round($nbEnAttente/$nbResas*100) }}%"></div>
                     <div class="bg-red-500 h-full" style="width:{{ round($nbRejetees/$nbResas*100) }}%"></div>
                 </div>
                 <div class="space-y-2">
                     <div class="flex items-center justify-between text-xs">
                         <div class="flex items-center gap-1.5">
-                            <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                            <div class="w-2 h-2 rounded-full bg-[#1a3c6e]"></div>
                             <span class="text-gray-600">Validées</span>
                         </div>
                         <span class="font-semibold text-gray-800">{{ $nbValidees }} ({{ round($nbValidees/$nbResas*100) }}%)</span>
                     </div>
                     <div class="flex items-center justify-between text-xs">
                         <div class="flex items-center gap-1.5">
-                            <div class="w-2 h-2 rounded-full bg-orange-400"></div>
+                            <div class="w-2 h-2 rounded-full bg-[#1a3c6e]"></div>
                             <span class="text-gray-600">En attente</span>
                         </div>
                         <span class="font-semibold text-gray-800">{{ $nbEnAttente }} ({{ round($nbEnAttente/$nbResas*100) }}%)</span>

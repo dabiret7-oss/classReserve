@@ -21,7 +21,7 @@
         ->withCount(['reservations as nb_validees' => fn($q) => $q->where('statut','validee')])
         ->orderByDesc('nb_validees')->take(5)->get();
     $maxOcc = $sallesOccupation->max('nb_validees') ?: 1;
-    $colors = ['bg-[#1a3c6e]','bg-red-700','bg-orange-500','bg-green-600','bg-purple-600'];
+    $colors = ['bg-[#1a3c6e]','bg-red-700','bg-[#1a3c6e]','bg-[#1a3c6e]','bg-[#1a3c6e]'];
 @endphp
 
 {{-- ══ CARTES STATS ══ --}}
@@ -41,27 +41,27 @@
     </div>
 
     <div class="bg-white rounded-xl border border-gray-200 p-5 relative overflow-hidden">
-        <div class="absolute top-0 left-0 right-0 h-1 bg-green-500 rounded-t-xl"></div>
-        <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-3">
-            <i class="ti ti-user-check text-xl text-green-600"></i>
+        <div class="absolute top-0 left-0 right-0 h-1 bg-[#1a3c6e] rounded-t-xl"></div>
+        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
+            <i class="ti ti-user-check text-xl text-[#1a3c6e]"></i>
         </div>
         <div class="text-3xl font-bold text-[#1a2b4a]">{{ $nbValides }}</div>
         <div class="text-sm text-gray-500 mt-1">Professeurs actifs</div>
         <a href="{{ route('admin.users.index') }}"
-           class="inline-flex items-center gap-1 text-xs text-green-600 font-medium mt-3 hover:underline">
+           class="inline-flex items-center gap-1 text-xs text-[#1a3c6e] font-medium mt-3 hover:underline">
             Voir tout <i class="ti ti-arrow-right text-xs"></i>
         </a>
     </div>
 
     <div class="bg-white rounded-xl border border-gray-200 p-5 relative overflow-hidden">
-        <div class="absolute top-0 left-0 right-0 h-1 bg-orange-500 rounded-t-xl"></div>
-        <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center mb-3">
-            <i class="ti ti-building text-xl text-orange-500"></i>
+        <div class="absolute top-0 left-0 right-0 h-1 bg-[#1a3c6e] rounded-t-xl"></div>
+        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
+            <i class="ti ti-building text-xl text-[#1a3c6e]"></i>
         </div>
         <div class="text-3xl font-bold text-[#1a2b4a]">{{ $nbSalles }}</div>
         <div class="text-sm text-gray-500 mt-1">Salles actives</div>
         <a href="{{ route('admin.salles.index') }}"
-           class="inline-flex items-center gap-1 text-xs text-orange-500 font-medium mt-3 hover:underline">
+           class="inline-flex items-center gap-1 text-xs text-[#1a3c6e] font-medium mt-3 hover:underline">
             Gérer <i class="ti ti-arrow-right text-xs"></i>
         </a>
     </div>
@@ -109,7 +109,7 @@
                         @csrf @method('PATCH')
                         <input type="hidden" name="salle_id" value="{{ $resa->salle_id }}">
                         <button title="Valider"
-                                class="w-8 h-8 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 flex items-center justify-center transition-colors">
+                                class="w-8 h-8 rounded-lg bg-blue-50 text-[#1a3c6e] hover:bg-blue-100 flex items-center justify-center transition-colors">
                             <i class="ti ti-check text-base"></i>
                         </button>
                     </form>
@@ -124,7 +124,7 @@
             </div>
         @empty
             <div class="text-center py-8 text-gray-400">
-                <i class="ti ti-check text-3xl block mb-2 text-green-400"></i>
+                <i class="ti ti-check text-3xl block mb-2 text-[#1a3c6e]"></i>
                 <p class="text-sm">Aucune réservation en attente</p>
             </div>
         @endforelse
@@ -208,14 +208,14 @@
             <div class="text-xs text-gray-400 mt-1">réservations au total</div>
         </div>
         <div class="h-3 rounded-full overflow-hidden flex mb-4">
-            <div class="bg-green-500 h-full" style="width:{{ $pctValidees }}%"></div>
-            <div class="bg-orange-400 h-full" style="width:{{ $pctAttente }}%"></div>
+            <div class="bg-[#1a3c6e] h-full" style="width:{{ $pctValidees }}%"></div>
+            <div class="bg-[#1a3c6e] h-full" style="width:{{ $pctAttente }}%"></div>
             <div class="bg-red-500 h-full" style="width:{{ $pctRejetees }}%"></div>
         </div>
         <div class="space-y-2.5">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <div class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-[#1a3c6e]"></div>
                     <span class="text-sm text-gray-600">Validées</span>
                 </div>
                 <div class="flex items-center gap-2">
@@ -225,7 +225,7 @@
             </div>
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <div class="w-2.5 h-2.5 rounded-full bg-orange-400"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-[#1a3c6e]"></div>
                     <span class="text-sm text-gray-600">En attente</span>
                 </div>
                 <div class="flex items-center gap-2">
@@ -252,8 +252,8 @@
         @php $cahiers = \App\Models\Cahier::with('classe')->withCount('seances')->latest()->take(4)->get(); @endphp
         @forelse($cahiers as $cahier)
             <div class="flex items-center gap-3 py-2.5 border-b border-gray-100 last:border-0">
-                <div class="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
-                    <i class="ti ti-notebook text-base text-green-700"></i>
+                <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                    <i class="ti ti-notebook text-base text-[#1a3c6e]"></i>
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-medium text-[#1a2b4a] truncate">{{ $cahier->classe->nom }}</p>

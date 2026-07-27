@@ -1,110 +1,56 @@
 @extends('layouts.app')
-
-@section('title', 'Nouveau cahier de texte')
+@section('title', 'Nouveau cahier')
+@section('page-title', 'Nouveau cahier')
 
 @section('content')
-<div style="max-width:680px; margin:40px auto; padding:0 24px">
-
-    <h1 style="font-size:28px; font-weight:700; color:#1a2b4a; margin-bottom:8px">
-        Cahier de texte
-    </h1>
-    <p style="color:#666; font-size:14px; margin-bottom:24px">
-        Renseignez les informations sur le cours dispensé.
-    </p>
-
-    @if($errors->any())
-        <div style="background:#f8d7da; color:#721c24; padding:12px 16px;
-                    border-radius:6px; margin-bottom:20px; font-size:14px">
-            <ul style="margin:0; padding-left:16px">
-                @foreach($errors->all() as $erreur)
-                    <li>{{ $erreur }}</li>
-                @endforeach
-            </ul>
+<div class="max-w-lg mx-auto">
+    <div class="bg-gradient-to-r from-[#1a3c6e] to-[#1e4d8c] rounded-2xl p-6 mb-6 flex items-center gap-4">
+        <div class="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center flex-shrink-0">
+            <i class="ti ti-notebook-plus text-3xl text-white"></i>
         </div>
-    @endif
-
-    <div style="background:white; border-radius:10px;
-                box-shadow:0 1px 4px rgba(0,0,0,0.08); padding:32px">
-
-        {{-- Informations auto --}}
-        <div style="background:#f5f7fa; border-radius:8px; padding:16px;
-                    margin-bottom:24px; border-left:4px solid #1a3c6e">
-            <p style="font-size:13px; font-weight:700; color:#1a3c6e;
-                      margin:0 0 10px 0">Informations du cours (automatiques)</p>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px">
-                <div>
-                    <span style="font-size:12px; color:#888">Date</span>
-                    <p style="font-size:14px; font-weight:600; color:#333; margin:2px 0 0 0">
-                        {{ \Carbon\Carbon::parse($reservation->date_debut)->format('d/m/Y') }}
-                    </p>
-                </div>
-                <div>
-                    <span style="font-size:12px; color:#888">Heure</span>
-                    <p style="font-size:14px; font-weight:600; color:#333; margin:2px 0 0 0">
-                        {{ \Carbon\Carbon::parse($reservation->date_debut)->format('H\hi') }}
-                        → {{ \Carbon\Carbon::parse($reservation->heure_fin)->format('H\hi') }}
-                    </p>
-                </div>
-                <div>
-                    <span style="font-size:12px; color:#888">Salle</span>
-                    <p style="font-size:14px; font-weight:600; color:#333; margin:2px 0 0 0">
-                        {{ $reservation->salle->nom }} — {{ $reservation->salle->niveau }}
-                    </p>
-                </div>
-                <div>
-                    <span style="font-size:12px; color:#888">Matière</span>
-                    <p style="font-size:14px; font-weight:600; color:#333; margin:2px 0 0 0">
-                        {{ $reservation->matiere?->nom ?? '—' }}
-                    </p>
-                </div>
-                <div>
-                    <span style="font-size:12px; color:#888">Classe</span>
-                    <p style="font-size:14px; font-weight:600; color:#333; margin:2px 0 0 0">
-                        {{ $reservation->classe?->nom ?? '—' }}
-                    </p>
-                </div>
-            </div>
+        <div>
+            <h2 class="text-xl font-bold text-white">Nouveau cahier</h2>
+            <p class="text-white/70 text-sm mt-0.5">Créer un cahier de texte</p>
         </div>
+    </div>
 
-        <form method="POST"
-              action="{{ route('professeur.cahiers.store', $reservation) }}">
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+        <form method="POST" action="{{ route('professeur.cahiers.store') }}" class="space-y-5">
             @csrf
-
-            <div style="margin-bottom:20px">
-                <label style="display:block; font-size:13px; font-weight:600;
-                              color:#444; margin-bottom:6px">
-                    Titre du module / chapitre
-                </label>
-                <input type="text" name="titre_module"
-                       value="{{ old('titre_module') }}"
-                       placeholder="Ex: Chapitre 3 — Les structures de données"
-                       style="width:100%; padding:10px 14px; border:1px solid #ddd;
-                              border-radius:6px; font-size:14px; box-sizing:border-box">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Classe <span class="text-red-500">*</span></label>
+                <select name="classe_id"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#1a3c6e] focus:ring-2 focus:ring-blue-100 bg-white">
+                    <option value="">-- Choisir une classe --</option>
+                    @foreach($classes as $classe)
+                        <option value="{{ $classe->id }}" {{ old('classe_id') == $classe->id ? 'selected' : '' }}>
+                            {{ $classe->nom }} — {{ $classe->filiere }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('classe_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
-
-            <div style="margin-bottom:28px">
-                <label style="display:block; font-size:13px; font-weight:600;
-                              color:#444; margin-bottom:6px">
-                    Contenu traité
-                </label>
-                <textarea name="contenu" rows="8"
-                          placeholder="Décrivez le contenu du cours dispensé..."
-                          style="width:100%; padding:10px 14px; border:1px solid #ddd;
-                                 border-radius:6px; font-size:14px; box-sizing:border-box;
-                                 resize:vertical; line-height:1.6">{{ old('contenu') }}</textarea>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Année académique <span class="text-red-500">*</span></label>
+                <div class="relative">
+                    <div class="absolute left-3.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                        <i class="ti ti-calendar text-[#1a3c6e] text-base"></i>
+                    </div>
+                    <input type="text" name="annee_academique"
+                           value="{{ old('annee_academique', date('Y') . '-' . (date('Y')+1)) }}"
+                           placeholder="Ex: 2025-2026"
+                           class="w-full pl-14 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#1a3c6e] focus:ring-2 focus:ring-blue-100">
+                </div>
+                @error('annee_academique')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
-
-            <div style="display:flex; gap:12px">
+            <div class="flex gap-3 pt-2 border-t border-gray-100">
                 <button type="submit"
-                        style="background:#1a3c6e; color:white; padding:10px 24px;
-                               border:none; border-radius:6px; font-size:14px;
-                               font-weight:600; cursor:pointer">
-                    Enregistrer le cahier
+                        class="flex-1 flex items-center justify-center gap-2 py-3 bg-[#1a3c6e] text-white text-sm font-semibold rounded-xl hover:bg-blue-900 transition-colors">
+                    <i class="ti ti-check text-base"></i> Créer le cahier
                 </button>
                 <a href="{{ route('professeur.cahiers.index') }}"
-                   style="padding:10px 24px; border:1px solid #ddd; border-radius:6px;
-                          font-size:14px; color:#555; text-decoration:none; font-weight:600">
-                    Annuler
+                   class="flex items-center justify-center gap-2 px-5 py-3 border border-gray-200 text-gray-600 text-sm font-medium rounded-xl hover:bg-gray-50">
+                    <i class="ti ti-arrow-left text-base"></i> Annuler
                 </a>
             </div>
         </form>

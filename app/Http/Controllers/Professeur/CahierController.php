@@ -15,13 +15,24 @@ class CahierController extends Controller
     // Liste tous les cahiers + statut d'accès du prof
     public function index()
     {
-        $cahiers = Cahier::with(['classe', 'acces' => function ($q) {
-            $q->where('user_id', Auth::id());
-        }])->where('statut', 'actif')
-            ->orderBy('annee_academique', 'desc')
-            ->get();
+    $userId = Auth::id();
 
-        return view('professeur.cahiers.index', compact('cahiers'));
+    // Cahiers où le prof a un accès validé
+    $cahiersAcces = CahierAcces::where('user_id', $userId)
+        ->where('statut', 'valide')
+        ->with(['cahier.classe', 'cahier.seances'])
+        ->get();
+
+    // Cahiers disponibles sans accès validé
+    $cahiersAvecAcces = $cahiersAcces->pluck('cahier_id');
+
+    $cahiersSansAcces = Cahier::where('statut', 'actif')
+        ->whereNotIn('id', $cahiersAvecAcces)
+        ->with(['classe', 'acces' => fn($q) => $q->where('user_id', $userId)])
+        ->orderBy('annee_academique', 'desc')
+        ->get();
+
+    return view('professeur.cahiers.index', compact('cahiersAcces', 'cahiersSansAcces'));
     }
 
     // Demander l'accès à un cahier
@@ -94,5 +105,71 @@ class CahierController extends Controller
         ]);
 
         return back()->with('success', 'Séance ajoutée au cahier.');
+    }
+
+
+    public function extrairePdf(Request $request)
+    {
+    $request->validate([
+        'pdf' => 'required|file|mimes:pdf|max:10240',
+    ], [
+        'pdf.required' => 'Veuillez sélectionner un fichier PDF.',
+        'pdf.mimes'    => 'Le fichier doit être au format PDF.',
+        'pdf.max'      => 'Le fichier ne doit pas dépasser 10 Mo.',
+    ]);
+
+    try {
+        $parser = new \Smalot\PdfParser\Parser();
+        $pdf    = $parser->parseFile($request->file('pdf')->getPathname());
+        $texte  = $pdf->getText();
+
+        // Extraire les titres — lignes courtes en majuscules ou commençant par Chapitre/Partie/Section
+        $lignes = explode("\n", $texte);
+        $titres = [];
+
+        foreach ($lignes as $ligne) {
+            $ligne = trim($ligne);
+
+            if (empty($ligne) || strlen($ligne) < 3) continue;
+
+            // Détecter titres : Chapitre X, Partie X, Section X, ou ligne courte en majuscules
+            $estTitre = false;
+
+            if (preg_match('/^(chapitre|partie|section|module|unité|leçon|thème|cours)\s+\w+/iu', $ligne)) {
+                $estTitre = true;
+            } elseif (preg_match('/^\d+[\.\-]\s+.{5,60}$/', $ligne)) {
+                $estTitre = true;
+            } elseif (strlen($ligne) <= 80 && $ligne === strtoupper($ligne) && preg_match('/[A-ZÀ-Ü]{3,}/', $ligne)) {
+                $estTitre = true;
+            }
+
+            if ($estTitre && strlen($ligne) <= 150) {
+                $titres[] = $ligne;
+            }
+        }
+
+        // Dédupliquer et limiter à 50 titres
+        $titres = array_unique($titres);
+        $titres = array_slice(array_values($titres), 0, 50);
+
+        if (empty($titres)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucun titre détecté dans ce PDF. Essayez avec un PDF contenant des chapitres numérotés.',
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'titres'  => $titres,
+            'count'   => count($titres),
+        ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la lecture du PDF : ' . $e->getMessage(),
+            ]);
+        }
     }
 }
