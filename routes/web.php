@@ -75,6 +75,9 @@ Route::patch('/salles/{salle}', [SalleController::class, 'update'])->name('salle
     Route::post('/reservations', [AdminReservationController::class, 'store'])->name('reservations.store');
     Route::patch('/reservations/{reservation}/valider', [AdminReservationController::class, 'valider'])->name('reservations.valider');
     Route::patch('/reservations/{reservation}/rejeter', [AdminReservationController::class, 'rejeter'])->name('reservations.rejeter');
+    Route::delete('/reservations/{reservation}', [AdminReservationController::class, 'destroy'])->name('reservations.destroy');
+    Route::get('/reservations/{reservation}/edit', [AdminReservationController::class, 'edit'])->name('reservations.edit');
+    Route::patch('/reservations/{reservation}', [AdminReservationController::class, 'update'])->name('reservations.update');
 
     // Cahiers de texte
     Route::get('/cahiers', [AdminCahierController::class, 'index'])->name('cahiers.index');
