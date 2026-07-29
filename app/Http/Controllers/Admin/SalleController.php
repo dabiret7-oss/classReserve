@@ -8,11 +8,11 @@ use Illuminate\Http\Request;
 
 class SalleController extends Controller
 {
-    // Lister toutes les salles
+    // pagination
     public function index()
     {
-        $salles = Salle::orderBy('niveau')->orderBy('nom')->get();
-        return view('admin.salles.index', compact('salles'));
+    $salles = Salle::orderBy('niveau')->orderBy('nom')->paginate(10);
+    return view('admin.salles.index', compact('salles'));
     }
 
     // Afficher le formulaire de création
@@ -52,4 +52,30 @@ class SalleController extends Controller
 
         return back()->with('success', 'Statut de la salle mis à jour.');
     }
+
+
+    public function edit(Salle $salle)
+{
+    return view('admin.salles.edit', compact('salle'));
+}
+
+public function update(Request $request, Salle $salle)
+{
+    $request->validate([
+        'nom'    => 'required|string|max:255|unique:salles,nom,' . $salle->id,
+        'niveau' => 'required|in:RDC,R+1,R+2,R+3',
+    ], [
+        'nom.required'    => 'Le nom de la salle est obligatoire.',
+        'nom.unique'      => 'Une salle avec ce nom existe déjà.',
+        'niveau.required' => 'Le niveau est obligatoire.',
+    ]);
+
+    $salle->update([
+        'nom'    => $request->nom,
+        'niveau' => $request->niveau,
+    ]);
+
+    return redirect()->route('admin.salles.index')
+        ->with('success', "Salle {$salle->nom} modifiée avec succès.");
+}
 }

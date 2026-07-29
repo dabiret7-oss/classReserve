@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CahierController as AdminCahierController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Professeur\ReservationController;
 use App\Http\Controllers\Professeur\CahierController as ProfCahierController;
 use App\Http\Controllers\ProfilController;
@@ -33,7 +34,8 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
-    Route::get('/dashboard', fn() => view('admin.dashboard'))->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class,'index'])->name('dashboard');
+    
     Route::get('/calendrier', [AdminReservationController::class, 'calendrier'])->name('calendrier');
 
     // Utilisateurs
@@ -49,16 +51,23 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/salles/create', [SalleController::class, 'create'])->name('salles.create');
     Route::post('/salles', [SalleController::class, 'store'])->name('salles.store');
     Route::patch('/salles/{salle}/toggle', [SalleController::class, 'toggleStatut'])->name('salles.toggle');
+    Route::get('/salles/{salle}/edit', [SalleController::class, 'edit'])->name('salles.edit');
+    Route::patch('/salles/{salle}', [SalleController::class, 'update'])->name('salles.update');
 
     // Matières
     Route::get('/matieres', [MatiereController::class, 'index'])->name('matieres.index');
     Route::post('/matieres', [MatiereController::class, 'store'])->name('matieres.store');
     Route::delete('/matieres/{matiere}', [MatiereController::class, 'destroy'])->name('matieres.destroy');
+    Route::get('/matieres/{matiere}/edit', [MatiereController::class, 'edit'])->name('matieres.edit');
+    Route::patch('/matieres/{matiere}', [MatiereController::class, 'update'])->name('matieres.update');
+
 
     // Classes
     Route::get('/classes', [ClasseController::class, 'index'])->name('classes.index');
     Route::post('/classes', [ClasseController::class, 'store'])->name('classes.store');
     Route::delete('/classes/{classe}', [ClasseController::class, 'destroy'])->name('classes.destroy');
+    Route::get('/classes/{classe}/edit', [ClasseController::class, 'edit'])->name('classes.edit');
+    Route::patch('/classes/{classe}', [ClasseController::class, 'update'])->name('classes.update');
 
     // Réservations
     Route::get('/reservations', [AdminReservationController::class, 'index'])->name('reservations.index');
@@ -66,6 +75,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('/reservations', [AdminReservationController::class, 'store'])->name('reservations.store');
     Route::patch('/reservations/{reservation}/valider', [AdminReservationController::class, 'valider'])->name('reservations.valider');
     Route::patch('/reservations/{reservation}/rejeter', [AdminReservationController::class, 'rejeter'])->name('reservations.rejeter');
+    Route::delete('/reservations/{reservation}', [AdminReservationController::class, 'destroy'])->name('reservations.destroy');
+    Route::get('/reservations/{reservation}/edit', [AdminReservationController::class, 'edit'])->name('reservations.edit');
+    Route::patch('/reservations/{reservation}', [AdminReservationController::class, 'update'])->name('reservations.update');
 
     // Cahiers de texte
     Route::get('/cahiers', [AdminCahierController::class, 'index'])->name('cahiers.index');
@@ -75,6 +87,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::patch('/cahiers/acces/{acces}/valider', [AdminCahierController::class, 'validerAcces'])->name('cahiers.acces.valider');
     Route::patch('/cahiers/acces/{acces}/rejeter', [AdminCahierController::class, 'rejeterAcces'])->name('cahiers.acces.rejeter');
     Route::get('/cahiers/{cahier}', [AdminCahierController::class, 'show'])->name('cahiers.show');
+
+
+    Route::get('/import', [App\Http\Controllers\Admin\ImportController::class, 'index'])->name('import.index');
+    Route::post('/import/salles', [App\Http\Controllers\Admin\ImportController::class, 'importSalles'])->name('import.salles');
+    Route::post('/import/matieres', [App\Http\Controllers\Admin\ImportController::class, 'importMatieres'])->name('import.matieres');
+    Route::post('/import/professeurs', [App\Http\Controllers\Admin\ImportController::class, 'importProfesseurs'])->name('import.professeurs');
+    Route::get('/import/modele/{type}', [App\Http\Controllers\Admin\ImportController::class, 'telechargerModele'])->name('import.modele');
 });
 
 Route::prefix('professeur')->name('professeur.')->middleware(['auth', 'professeur'])->group(function () {
@@ -98,4 +117,6 @@ Route::prefix('professeur')->name('professeur.')->middleware(['auth', 'professeu
         auth()->user()->unreadNotifications->markAsRead();
         return back();
     })->name('notifications.lire');
+
+    Route::post('/cahiers/extraire-pdf', [App\Http\Controllers\Professeur\CahierController::class, 'extrairePdf'])->name('cahiers.extraire-pdf');
 });

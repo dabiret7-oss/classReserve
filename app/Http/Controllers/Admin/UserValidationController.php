@@ -13,13 +13,12 @@ class UserValidationController extends Controller
             ->where('statut', 'en_cours')
             ->latest()
             ->get();
-
-        $toutProfesseur = User::withTrashed()
-            ->where('role', 'professeur')
+    
+        $toutProfesseur = User::where('role', 'professeur')
             ->whereIn('statut', ['valide', 'rejete', 'desactive'])
             ->latest()
             ->paginate(10);
-
+    
         return view('admin.users.index', compact('pendingUsers', 'toutProfesseur'));
     }
 
