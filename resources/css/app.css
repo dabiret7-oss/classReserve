@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import '@tabler/icons-webfont/tabler-icons.css';
 
 /* ── Couleurs HETEC personnalisées ── */
 @theme {
